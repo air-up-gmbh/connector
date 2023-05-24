@@ -13,8 +13,17 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
         
+      - name: Install SSH
+        run: |
+          mkdir -p ~/.ssh
+          # Add the new ssh key from the secrets
+          echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" >> ~/.ssh/id_rsa
+          echo "${{ secrets.GIT_SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          # ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/*
+          
       - name: Mirroring
         run: |
-          git remote add --mirror=fetch mirror "git@github.com:OCA/connector.git"
+          git remote add --mirror=fetch mirror "ssh://git@github.com:OCA/connector.git"
           git fetch mirror +refs/heads/*:refs/remotes/origin/*
           git push --force --mirror --prune origin
